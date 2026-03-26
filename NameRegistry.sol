@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity >>=0.4.11;
+pragma solidity >=0.4.11;
 contract NameRegistry {
 
 	// 컨트랙트를 나타낼 구조체
 	struct Contract {
 		address owner; // 등록하는 함수를 호출한 사람
 		address addr;
-		string memory description;
+		string description;
 	}
 
 	// 등록된 레코드 수

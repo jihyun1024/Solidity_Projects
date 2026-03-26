@@ -1,29 +1,32 @@
-pragma solidity ^0.4.11;
+// SPDX-License-Identifier: UNLICENSED
+
+pragma solidity >>=0.4.11;
 contract NameRegistry {
 
-	// ÄÁÆ®·¢Æ®¸¦ ³ªÅ¸³¾ ±¸Á¶Ã¼
+	// ì»¨íŠ¸ë™íŠ¸ë¥¼ ë‚˜íƒ€ë‚¼ êµ¬ì¡°ì²´
 	struct Contract {
-		address owner;
+		address owner; // ë“±ë¡í•˜ëŠ” í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•œ ì‚¬ëŒ
 		address addr;
-		bytes32 description;
+		string memory description;
 	}
 
-	// µî·ÏµÈ ·¹ÄÚµå ¼ö
+	// ë“±ë¡ëœ ë ˆì½”ë“œ ìˆ˜
 	uint public numContracts;
 
-	// ÄÁÆ®·¢Æ®¸¦ ÀúÀåÇÒ ¸ÅÇÎ
-	mapping (bytes32  => Contract) public contracts;
+	// ì»¨íŠ¸ë™íŠ¸ë¥¼ ì €ì¥í•  ë§¤í•‘
+	// string íƒ€ì…ì„ ë°›ì•„ Contract êµ¬ì¡°ì²´ íƒ€ì…ìœ¼ë¡œ ì €ì¥, publicìœ¼ë¡œ ëˆ„êµ¬ë‚˜ ì ‘ê·¼ ê°€ëŠ¥í•˜ê²Œ
+	mapping (string  => Contract) public contracts;
     
-	/// »ı¼ºÀÚ
+	/// ìƒì„±ì
 	function NameRegistry() {
 		numContracts = 0;
 	}
 
-	/// ÄÁÆ®·¢Æ® µî·Ï
-	function register(bytes32 _name) public returns (bool){
-		// ¾ÆÁ÷ »ç¿ëµÇÁö ¾ÊÀº ÀÌ¸§ÀÌ¸é ½Å±Ô µî·Ï
-		if (contracts[_name].owner == 0) {
-			Contract con = contracts[_name];
+	/// ì»¨íŠ¸ë™íŠ¸ ë“±ë¡
+	function register(string memory _name) public returns (bool){
+		// ì•„ì§ ì‚¬ìš©ë˜ì§€ ì•Šì€ ì´ë¦„ì´ë©´ ì‹ ê·œ ë“±ë¡
+		if (contracts[_name].owner == address(0x0)) {
+			Contract storage con = contracts[_name];
 			con.owner = msg.sender;
 			numContracts++;
 			return true;
@@ -32,10 +35,10 @@ contract NameRegistry {
 		}
 	}
 
-	/// ÄÁÆ®·¢Æ® »èÁ¦
-	function unregister(bytes32 _name) public returns (bool) {
+	/// ì»¨íŠ¸ë™íŠ¸ ì‚­ì œ
+	function unregister(string memory _name) public returns (bool) {
 		if (contracts[_name].owner == msg.sender) {
-			contracts[_name].owner = 0;
+			contracts[_name].owner = address(0x0);
  			numContracts--;
  			return true;
 		} else {
@@ -43,38 +46,38 @@ contract NameRegistry {
 		}
 	}
 	
-	/// ÄÁÆ®·¢Æ® ¼ÒÀ¯ÀÚ º¯°æ
-	function changeOwner(bytes32 _name, address _newOwner) public onlyOwner(_name) {
+	/// ì»¨íŠ¸ë™íŠ¸ ì†Œìœ ì ë³€ê²½
+	function changeOwner(string memory _name, address _newOwner) public onlyOwner(_name) {
 		contracts[_name].owner = _newOwner;
 	}
 	
-	/// ÄÁÆ®·¢Æ® ¼ÒÀ¯ÀÚ Á¤º¸ È®ÀÎ
-	function getOwner(bytes32 _name) constant public returns (address) {
+	/// ì»¨íŠ¸ë™íŠ¸ ì†Œìœ ì ì •ë³´ í™•ì¸
+	function getOwner(string memory _name) view public returns (address) {
 		return contracts[_name].owner;
 	}
     
-	/// ÄÁÆ®·¢Æ® ¾îµå·¹½º º¯°æ
-	function setAddr(bytes32 _name, address _addr) public onlyOwner(_name) {
+	/// ì»¨íŠ¸ë™íŠ¸ ì–´ë“œë ˆìŠ¤ ë³€ê²½
+	function setAddr(string memory _name, address _addr) public onlyOwner(_name) {
 		contracts[_name].addr = _addr;
     }
     
-	/// ÄÁÆ®·¢Æ® ¾îµå·¹½º È®ÀÎ
-	function getAddr(bytes32 _name) constant public returns (address) {
+	/// ì»¨íŠ¸ë™íŠ¸ ì–´ë“œë ˆìŠ¤ í™•ì¸
+	function getAddr(string memory _name) view public returns (address) {
 		return contracts[_name].addr;
 	}
         
-	/// ÄÁÆ®·¢Æ® ¼³¸í º¯°æ
-	function setDescription(bytes32 _name, bytes32 _description) public onlyOwner(_name) {
+	/// ì»¨íŠ¸ë™íŠ¸ ì„¤ëª… ë³€ê²½
+	function setDescription(string memory _name, string memory _description) public onlyOwner(_name) {
 		contracts[_name].description = _description;
 	}
 
-	/// ÄÁÆ®·¢Æ® ¼³¸í È®ÀÎ
-	function getDescription(bytes32 _name) constant public returns (bytes32)  {
+	/// ì»¨íŠ¸ë™íŠ¸ ì„¤ëª… í™•ì¸
+	function getDescription(string memory _name) view public returns (string memory)  {
 		return contracts[_name].description;
 	}
     
-	/// ÇÔ¼ö¸¦ È£Ãâ Àü ¸ÕÀú Ã³¸®µÇ´Â modifier¸¦ Á¤ÀÇ
-	modifier onlyOwner(bytes32 _name) {
+	/// í•¨ìˆ˜ë¥¼ í˜¸ì¶œ ì „ ë¨¼ì € ì²˜ë¦¬ë˜ëŠ” modifierë¥¼ ì •ì˜
+	modifier onlyOwner(string memory _name) {
 	    require(contracts[_name].owner == msg.sender);
 		_;
 	}

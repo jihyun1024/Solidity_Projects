@@ -1,0 +1,167 @@
+
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.15.0/ethers.umd.min.js"></script>
+<script type="text/javascript" src="abilist.js">  </script>
+<script type="text/javascript">
+let contract;
+let resultbox;
+
+window.addEventListener('load', nameregistry);
+
+async function nameregistry() {
+  if (window.ethereum) {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = await provider.getSigner();
+    var address = "0xd5fB9aa4ddFaD9E9deeb062a1938A96D17aC83Ea";
+    contract = new ethers.Contract(address, nameregistryabi, signer);
+  } else {
+    console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    contract = null;
+  }
+  addEvtHandlers();
+}
+
+function addEvtHandlers() {
+
+  let btn = document.getElementById("changeOwner");
+  btn.addEventListener('click', setattribute);
+  btn = document.getElementById("setAddr");
+  btn.addEventListener('click', setAddr);
+  btn = document.getElementById("setDescription");
+  btn.addEventListener('click', setattribute);
+
+  btn = document.getElementById("register");
+  btn.addEventListener('click', setoneval);
+  btn = document.getElementById("unregister");
+  btn.addEventListener('click', setoneval);
+
+  btn = document.getElementById("contracts");
+  btn.addEventListener('click', oneargfunc);
+  btn = document.getElementById("getAddr");
+  btn.addEventListener('click', oneargfunc);
+  btn = document.getElementById("getDescription");
+  btn.addEventListener('click', oneargfunc);
+  btn = document.getElementById("getOwner");
+  btn.addEventListener('click', oneargfunc);
+
+  btn = document.getElementById("numContracts");
+  btn.addEventListener('click', showvalues);
+
+  resultbox = document.getElementById("resultbox");
+}
+
+
+async function setattribute() {
+  if (contract != null) {
+    try {
+        let conname = document.getElementById("conname");
+        let name = conname.value;
+        let conattr = document.getElementById("conattr");
+        let attr = conattr.value;
+	const value = await contract[this.id](name, attr);
+	resultbox.innerHTML = JSON.stringify(value);
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function setAddr() {
+  if (contract != null) {
+    try {
+        let conname = document.getElementById("conname");
+        let name = conname.value;
+        let conattr = document.getElementById("conattr");
+        let address = ethers.getAddress(conattr.value);
+	const value = await contract.setAddr(name, address);
+	resultbox.innerHTML = JSON.stringify(value);
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function setoneval() {
+  if (contract != null) {
+    try {
+        let conname = document.getElementById("conname");
+        let name = conname.value;
+	let value = await contract[this.id](name);
+	if (value)
+		resultbox.innerHTML = JSON.stringify(value);
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+
+async function oneargfunc() {
+  if (contract != null) {
+    try {
+        let conname = document.getElementById("conname");
+        let name = conname.value;
+	const value = await contract[this.id](name);
+	resultbox.innerHTML = JSON.stringify(value);
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function showvalues() {
+  if (contract != null) {
+    try {
+	const value = await contract[this.id]();
+	resultbox.innerHTML = JSON.stringify(value, (key, val) => typeof val === 'bigint' ? val.toString() : val);
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+
+</script>
+</head>
+<body>
+<h1> Name Registry Test </h1>
+<br/>
+Contract Name: <input type="text" id="conname" value="">  
+Attribute: <input type="text" id="conattr" value="" size=100>  
+<br/>
+Result: <span id="resultbox"> </span>
+<br/>
+<br/>
+<input type="button" id="changeOwner" value="changeOwner()" style="width:200px">
+<br/> <br/>
+<input type="button" id="register" value="register()" style="width:200px">
+<br/> <br/>
+<input type="button" id="setAddr" value="setAddr()" style="width:200px">
+<br/> <br/>
+<input type="button" id="setDescription" value="setDescription()" style="width:200px">
+<br/> <br/>
+<input type="button" id="unregister" value="unregister()" style="width:200px">
+<br/> <br/>
+<input type="button" id="contracts" value="contracts" style="width:200px">
+<br/> <br/>
+<input type="button" id="getAddr" value="getAddr" style="width:200px">
+<br/> <br/>
+<input type="button" id="getDescription" value="getDescription" style="width:200px">  
+<br/> <br/>
+<input type="button" id="getOwner" value="getOwner" style="width:200px">
+<br/> <br/>
+<input type="button" id="numContracts" value="numContracts" style="width:200px">
+
+
+</body>
+</html>
+
+
+

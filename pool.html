@@ -1,0 +1,137 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.15.0/ethers.umd.min.js"></script>
+<script type="text/javascript" src="abilist.js"></script>
+
+<script type="text/javascript">
+let accounts = null;
+let cfcontract = null;
+let resultbox = null;
+let provider, signer;
+
+function toJson(obj) {
+  return JSON.stringify(obj, (key, val) => typeof val === 'bigint' ? val.toString() : val);
+}
+
+window.addEventListener('load', init);
+
+async function init() {
+  if (window.ethereum) {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    accounts = [await signer.getAddress()];
+
+    getContractInstance();
+  } else {
+    console.log('MetaMask 필요');
+  }
+}
+
+async function getContractInstance() {
+  try {
+    let address = contractAddress;  
+    cfcontract = new ethers.Contract(address, abi, signer);
+
+    registerEventHandlers();
+    alert("Contract 연결됨: " + address);
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function registerEventHandlers() {
+  document.getElementById("bet").addEventListener('click', bet);
+  document.getElementById("draw").addEventListener('click', draw);
+  document.getElementById("players").addEventListener('click', players);
+
+  // 조회 버튼들
+  ["totalAmounts","numOfPlayers","betStatus","ended","owner"].forEach(id => {
+    document.getElementById(id).addEventListener('click', showvalues);
+  });
+
+  resultbox = document.getElementById("resultbox");
+  resultbox.innerHTML = JSON.stringify(accounts);
+}
+
+async function bet() {
+  if (cfcontract != null) {
+    try {
+      let tx = await cfcontract.bet({
+        value: ethers.parseEther("1") // 1 ETH
+      });
+      let receipt = await tx.wait();
+      resultbox.innerHTML = toJson(receipt);
+    } catch (error) {
+      resultbox.innerHTML = "error";
+      console.log(error);
+    }
+  }
+}
+
+async function draw() {
+  if (cfcontract != null) {
+    try {
+      let tx = await cfcontract.draw();
+      let receipt = await tx.wait();
+      resultbox.innerHTML = toJson(receipt);
+    } catch (error) {
+      resultbox.innerHTML = "error";
+      console.log(error);
+    }
+  }
+}
+
+async function players() {
+  if (cfcontract != null) {
+    try {
+      let id = document.getElementById("playerid").value;
+      let value = await cfcontract.players(id);
+      resultbox.innerHTML = toJson(value);
+    } catch (error) {
+      resultbox.innerHTML = "error";
+      console.log(error);
+    }
+  }
+}
+
+async function showvalues() {
+  if (cfcontract != null) {
+    try {
+      let value = await cfcontract[this.id]();
+      resultbox.innerHTML = toJson(value);
+    } catch (error) {
+      resultbox.innerHTML = JSON.stringify(error);
+      console.log(error);
+    }
+  }
+}
+</script>
+
+</head>
+<body>
+<h1> Pool Betting </h1>
+<br/>
+<input type="button" id="bet" value="bet() (1 ETH)">
+<br/>
+<input type="button" id="draw" value="draw() (owner only)">
+<br/>
+<input type="button" id="players" value="players"> 
+index: <input type="text" id="playerid" value="">
+<br/>
+<hr/>
+<input type="button" id="totalAmounts" value="totalAmounts">
+<br/>
+<input type="button" id="numOfPlayers" value="numOfPlayers">
+<br/>
+<input type="button" id="betStatus" value="betStatus">
+<br/>
+<input type="button" id="ended" value="ended">
+<br/>
+<input type="button" id="owner" value="owner">
+<br/>
+<hr/>
+Result: <span id="resultbox"></span>
+</body>
+</html>
